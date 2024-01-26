@@ -146,6 +146,23 @@ class MocketTestCase(TestCase):
             self.assertEqual(fp.read().strip(), encode_to_bytes("Show me."))
             self.assertEqual(len(Mocket.request_list()), 1)
 
+    def test_multiple_sockets(self):
+        httpbin_addr = ("localhost", 80)
+        tcpbin_addr = ("localhost", 1234)
+
+        buffer = io.BytesIO()
+        with Mocketizer():
+            tcpbin_so = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            tcpbin_so.connect(tcpbin_addr)
+
+            httpbin_so = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            httpbin_so.connect(httpbin_addr)
+
+            tcpbin_so.sendall(b"hello\r\n")
+            tcpbin_so.recv_into(buffer)
+        buffer.seek(0)
+        assert buffer.read() == b"hello\n"
+
     def test_socket_as_context_manager(self):
         addr = ("localhost", 80)
         Mocket.register(MocketEntry(addr, ["Show me.\r\n"]))

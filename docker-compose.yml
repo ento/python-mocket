@@ -13,3 +13,8 @@ services:
     image: redis:latest
     ports:
       - "6379:6379"
+  tcpbin:
+    image: alpine:latest
+    ports:
+      - "1234:1234"
+    command: ["nc", "-lk", "-p", "1234", "-e", "xargs", "-n1", "echo"]
